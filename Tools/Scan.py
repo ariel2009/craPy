@@ -1,5 +1,5 @@
+# import required network modules
 import ipaddress
-
 from ServeClasses import Networking
 from scapy.all import *
 from scapy.layers.l2 import ARP, Ether
@@ -8,28 +8,37 @@ from concurrent.futures import ThreadPoolExecutor
 import socket
 
 
+# Constructor
 class Scan:
     def __init__(self, net="127.0.0.1", port=0):
         self.ans = None
         self.net = net
         self.port = port
         self.ip_to_scan = "127.0.0.1"
-        # self.protcl = protcl
-        # self.checkprotcl(self.protcl)
 
-    def checkprotcl(self, protcl):
-        pass
-
+    # Function for arp scan by givven ip/s
     def arp_scan(self, ip_to_scan="127.0.0.1", is_for_arp=True):
+        '''
+        Function for scanning alive hosts by arp protocol
+        :param ip_to_scan:
+        :param is_for_arp: say if the scan is part of port scan or not
+        :return: Arp scan only - Verbose details aboute alive hosts
+                 As prepare for port scan - Minimal information required for efficient port scanning
+        '''
         if is_for_arp:
-            ans, unans = srp(Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst=ip_to_scan), timeout=1, verbose=1)
-            ans.summary(lambda s,r: r.sprintf("%Ether.src% %ARP.psrc%") )
-        # Should be additional features like threading and realtime scan
+            # If for arp scan only by hitting "main.py scan -sA [ip/s,host/s]"
+            ans, unans = srp(Ether(dst="ff:ff:ff:ff:ff:ff") /
+                             ARP(pdst=ip_to_scan), timeout=1, verbose=1)  # Create an arp packet with the given ip/s
+            ans.summary(lambda s, r: r.sprintf("%Ether.src% %ARP.psrc%"))  # Send and recv the packet with details
         else:
-            ans, unans = srp(Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst=ip_to_scan), timeout=1, verbose=0)
+            # If for arp scan as prepare to multihost port scan "main.py scan -p [port/s] -h [hosts]"
+            ans, unans = srp(Ether(dst="ff:ff:ff:ff:ff:ff") /
+                             ARP(pdst=ip_to_scan),
+                             timeout=1, verbose=0)  # The same like the previous "if" but set verbose to "0"
             if ans:
+                # If response succeed, return its details to the port scanner
                 _, response = ans[0]
-                return response[ARP].psrc
+                return response[ARP].psrc  #
 
     def port_scan(self):
         port_arr = self.port_calc()
@@ -54,11 +63,16 @@ class Scan:
                         print(is_open)
 
     def port_calc(self):
+        '''
+        Function that implement Algorithm for generating
+        valid port range by given format [0-999,1000,1001-1099]
+        :return: Array of all ports including in the given format
+        '''
         port_str = str(self.port)
-        comma_arr = port_str.split(',')
+        comma_arr = port_str.split(',')  # First, split text by ","
         finished_arr = []
         for search_dash in comma_arr:
-            if '-' in search_dash:
+            if '-' in search_dash:  # If there are "-" chars after split, split again by "-"
                 dash_range = search_dash.split('-')
                 for dash_one_port in range(int(dash_range[0]), int(dash_range[1])):
                     finished_arr.append(dash_one_port)
