@@ -22,10 +22,9 @@ def cli(ctx, repo_home, debug):
 @cli.command(help="Scan for open ports or alive hosts")
 # @click.option('-p', help="protocols or ports to scan", required=False)
 @click.option('-sA', help='scan for alive hosts by arp pings', required=False)
-@click.option('-h',help='provide an ip address',required=False)
-@click.option('-p',help='scan for open ports', required=False)
-@click.option('-t', help='Amount of Threads', required=False, default="10")
-def scan(sa, h, p, t):
+@click.option('-h', help='provide an ip address', required=False)
+@click.option('-p', help='scan for open ports', required=False)
+def scan(sa, h, p):
     if sa:
         scan_addr_obj = Scan.Scan(sa)
         scan_addr_obj.print_arp_scan()
