@@ -22,7 +22,7 @@ def cli(ctx, repo_home, debug):
     ctx.obj = CraPy(repo_home, debug)
 
 
-# This is the help msg once hitting main,py --help
+# This is the help msg once hitting main.py --help
 @cli.command(help="Scan for open ports or alive hosts")
 # Define the cli options of the tool
 @click.option('-sA', help='scan for alive hosts by arp pings', required=False)
@@ -36,3 +36,21 @@ def scan(sa, h, p):
     elif h and p:
         scan_addr_obj = Scan.Scan(h, p)
         scan_addr_obj.port_scan()
+
+
+@cli.group()
+def attack():
+    pass
+
+
+@click.command()
+# Define the cli options of the tool
+@click.option('-u', help='Certain username', required=False)
+@click.option('-U', help='Usernames files', required=False)
+@click.option('-p', help='Certain password', required=False)
+@click.option('-P', help='Passwords file', required=False)
+@click.option('-h', help='IP/host to attack', required=False)
+
+# Call the Scan class to Scan ip/host/port depending on the selected option
+def attack(sa, h, p):
+    pass
